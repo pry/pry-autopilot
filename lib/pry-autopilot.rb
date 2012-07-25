@@ -20,9 +20,9 @@ class PryAutopilot
     @input = []
   end
 
-  def readline
+  def readline(prompt)
     process_predicates if input.empty?
-    input.pop || raise(EOFError)
+    input.shift || Readline.readline(prompt)
   end
 
   private
@@ -43,12 +43,16 @@ class PryAutopilot
   end
 
   def interactive!
-    @pry.input = Readline
+    input << "_pry_.input = Readline"
   end
 end
 
 class MyPilot < PryAutopilot
   on ->(frame) { frame.method_name == :bing } do
+    input << "ls"
+    input << "cd 1/2/3/4/5"
+    input << "ls -m"
+    input << "puts 'odelay!'"
     interactive!
   end
 
