@@ -15,9 +15,12 @@ class PryAutopilot
 
   attr_accessor :input
 
-  def initialize(_pry_)
-    @pry = _pry_
+  def initialize
     @input = []
+  end
+
+  def set_pry(_pry_)
+    @pry = _pry_
   end
 
   def readline(prompt)
@@ -31,6 +34,7 @@ class PryAutopilot
   end
 
   def process_predicates
+    return if !predicates
     predicates.each do |predicate, block|
       if predicate.call(frame)
         instance_exec(&block)
@@ -47,22 +51,8 @@ class PryAutopilot
   end
 end
 
-class MyPilot < PryAutopilot
-  on ->(frame) { frame.method_name == :bing } do
-    input << "ls"
-    input << "cd 1/2/3/4/5"
-    input << "ls -m"
-    input << "puts 'odelay!'"
-    interactive!
-  end
+Pry.config.correct_indent = true
 
-  on ->(frame) { true } do
-    input << "ls"
-    input << "step"
-  end
-end
-
-Pry.config.auto_indent = false
-Pry.config.hooks.add_hook(:when_started, :autopilot) do |_, _, _pry_|
-  _pry_.input = MyPilot.new(_pry_)
+Pry.config.hooks.add_hook(:when_started, :init_autopilot) do |_, _, _pry_|
+  _pry_.input.set_pry(_pry_) if _pry_.input.is_a?(PryAutopilot)
 end

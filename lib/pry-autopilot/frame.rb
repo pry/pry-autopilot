@@ -5,11 +5,15 @@ class PryAutopilot
     end
 
     def method_name
-      @binding.eval("__method__")
+      @binding.eval("__method__").to_sym
     end
 
     def class_name
-      @binding.eval("self.class")
+      @binding.eval("self.class.name").to_sym
+    end
+
+    def self
+      @binding.eval("self")
     end
 
     def eval(*args)
