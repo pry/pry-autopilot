@@ -2,6 +2,8 @@ $:.unshift File.expand_path '../../lib', __FILE__
 require 'pry'
 require 'pry-autopilot'
 
+Pry.config.auto_indent = false
+
 class MyPilot < PryAutopilot
   # on ->(frame) { frame.method_name == :bing } do
   #   input << "ls"
@@ -16,12 +18,16 @@ class MyPilot < PryAutopilot
   #   input << "step"
   # end
 
-  on ->(frame) { frame.class_name == :Pry } do
+  on ->(frame) { frame.class_name == :Pry } do |input|
     input << "puts you're in Pry lol\n"
     input << "doing an ls!\n"
     input << "ls\n"
+    puts "hey baby 1"
+    input << "ls"
     input << "cd-ing into your mom\n"
+    puts "love bum 2"
     input << "cd :your_mom\n"
+    puts "tricky malone 3"
   end
 end
 

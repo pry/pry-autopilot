@@ -2,6 +2,7 @@
 
 require "pry-autopilot/version"
 require "pry-autopilot/frame"
+require "pry-autopilot/input"
 
 class PryAutopilot
   class << self
@@ -16,7 +17,8 @@ class PryAutopilot
   attr_accessor :input
 
   def initialize
-    @input = []
+    @input = Input.new
+    @fibers = []
   end
 
   def set_pry(_pry_)
@@ -24,8 +26,16 @@ class PryAutopilot
   end
 
   def readline(prompt)
-    process_predicates if input.empty?
-    input.shift || Readline.readline(prompt)
+    if @fibers.empty?
+      process_predicates
+    end
+
+    if @fibers.any?
+      @current_fiber = @fibers.shift if !@current_fiber || !@current_fiber.alive?
+      @current_fiber.resume(input)
+    else
+      Readline.readline(prompt)
+    end
   end
 
   private
@@ -37,7 +47,7 @@ class PryAutopilot
     return if !predicates
     predicates.each do |predicate, block|
       if predicate.call(frame)
-        instance_exec(&block)
+        @fibers << Fiber.new(&block)
       end
     end
   end
