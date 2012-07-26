@@ -16,8 +16,9 @@ class PryAutopilot
 
   attr_accessor :input
 
-  def initialize
+  def initialize(fallback_input=Readline)
     @input = Input.new
+    @fallback_input = fallback_input
     @fibers = []
   end
 
@@ -34,7 +35,7 @@ class PryAutopilot
       @current_fiber = @fibers.shift if !@current_fiber || !@current_fiber.alive?
       @current_fiber.resume(input)
     else
-      Readline.readline(prompt)
+      @fallback_input.readline(prompt)
     end
   end
 
