@@ -2,57 +2,52 @@
 
 require "pry-autopilot/version"
 require "pry-autopilot/frame"
+require "pry-autopilot/input"
 
 class PryAutopilot
-  class << self
-    attr_reader :predicates
-
-    def on(predicate, &block)
-      @predicates ||= []
-      @predicates << [predicate, block]
-    end
-  end
-
   attr_accessor :input
+  attr_reader :predicates
+  attr_accessor :_pry_
 
-  def initialize
-    @input = []
-  end
-
-  def set_pry(_pry_)
-    @pry = _pry_
+  def initialize(fallback_input=Readline, &block)
+    @input = Input.new(self)
+    @fallback_input = fallback_input
+    instance_exec(&block) if block
   end
 
   def readline(prompt)
     process_predicates if input.empty?
-    input.shift || Readline.readline(prompt)
+    input.shift || fallback_readline(prompt)
+  end
+
+  def on(predicate, &block)
+    @predicates ||= []
+    @predicates << [predicate, block]
   end
 
   private
   def frame
-    Frame.new(@pry.current_context)
+    Frame.new(@_pry_.current_context)
+  end
+
+  def fallback_readline(prompt)
+    if @fallback_input.method(:readline).arity == 0
+      @fallback_input.readline
+    else
+      @fallback_input.readline(prompt)
+    end
   end
 
   def process_predicates
     return if !predicates
     predicates.each do |predicate, block|
       if predicate.call(frame)
-        instance_exec(&block)
+        block.call(input)
       end
     end
   end
-
-  def predicates
-    self.class.predicates
-  end
-
-  def interactive!
-    input << "_pry_.input = Readline"
-  end
 end
 
-Pry.config.correct_indent = true
-
 Pry.config.hooks.add_hook(:when_started, :init_autopilot) do |_, _, _pry_|
-  _pry_.input.set_pry(_pry_) if _pry_.input.is_a?(PryAutopilot)
+  _pry_.input._pry_ = _pry_ if _pry_.input.is_a?(PryAutopilot)
 end

@@ -2,30 +2,19 @@ $:.unshift File.expand_path '../../lib', __FILE__
 require 'pry'
 require 'pry-autopilot'
 
-class MyPilot < PryAutopilot
-  # on ->(frame) { frame.method_name == :bing } do
-  #   input << "ls"
-  #   input << "cd 1/2/3/4/5"
-  #   input << "ls -m"
-  #   input << "puts 'odelay!'"
-  #   interactive!
-  # end
+my_pilot = PryAutopilot.new do
+  on ->(frame) { frame.method_name == :gamma } do |input|
+    input << "puts 'welcome to gamma!'"
+    input.interactive!
+  end
 
-  # on ->(frame) { true } do
-  #   input << "ls"
-  #   input << "step"
-  # end
-
-  on ->(frame) { frame.class_name == :Pry } do
-    input << "puts you're in Pry lol\n"
-    input << "doing an ls!\n"
-    input << "ls\n"
-    input << "cd-ing into your mom\n"
-    input << "cd :your_mom\n"
+  on ->(frame) { true } do |input|
+    input << "ls"
+    input << "step"
   end
 end
 
-Pry.config.input = MyPilot.new
+Pry.config.input = my_pilot
 
 def alpha
   x = "hello"
