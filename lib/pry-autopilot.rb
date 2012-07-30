@@ -15,15 +15,12 @@ class PryAutopilot
   end
 
   attr_accessor :input
+  attr_accessor :pry
 
   def initialize(fallback_input=Readline)
-    @input = Input.new
+    @input = Input.new(self)
     @fallback_input = fallback_input
     @fibers = []
-  end
-
-  def set_pry(_pry_)
-    @pry = _pry_
   end
 
   def readline(prompt)
@@ -56,14 +53,10 @@ class PryAutopilot
   def predicates
     self.class.predicates
   end
-
-  def interactive!
-    input << "_pry_.input = Readline"
-  end
 end
 
 Pry.config.correct_indent = true
 
 Pry.config.hooks.add_hook(:when_started, :init_autopilot) do |_, _, _pry_|
-  _pry_.input.set_pry(_pry_) if _pry_.input.is_a?(PryAutopilot)
+  _pry_.input.pry = _pry_ if _pry_.input.is_a?(PryAutopilot)
 end

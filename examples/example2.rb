@@ -5,30 +5,17 @@ require 'pry-autopilot'
 Pry.config.auto_indent = false
 
 class MyPilot < PryAutopilot
-  # on ->(frame) { frame.method_name == :bing } do
+  # on ->(frame) { frame.locals.include?(:x) && frame.var("x") == 20 } do |input|
+  #   puts "x was found equal to 20"
   #   input << "ls"
-  #   input << "cd 1/2/3/4/5"
-  #   input << "ls -m"
-  #   input << "puts 'odelay!'"
-  #   interactive!
+  #   input.interactive!
   # end
 
-  # on ->(frame) { true } do
-  #   input << "ls"
-  #   input << "step"
-  # end
-
-  on ->(frame) { frame.class_name == :Pry } do |input|
-    input << "puts you're in Pry lol\n"
-    input << "doing an ls!\n"
-    input << "ls\n"
-    puts "hey baby 1"
-    input << "ls"
-    input << "cd-ing into your mom\n"
-    puts "love bum 2"
-    input << "cd :your_mom\n"
-    puts "tricky malone 3"
+  on ->(frame) { true } do |input|
+    input << "show-source"
+    input << "next"
   end
+
 end
 
 Pry.config.input = MyPilot.new

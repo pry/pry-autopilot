@@ -16,6 +16,10 @@ class PryAutopilot
       @binding.eval("self")
     end
 
+    def locals
+      @binding.eval("local_variables")
+    end
+
     def eval(*args)
       @binding.eval(*args)
     end
