@@ -53,6 +53,16 @@ task :example2 do
   sh "ruby -I#{direc}/lib/ #{direc}/examples/example2.rb "
 end
 
+desc "Run example3"
+task :example3 do
+  sh "ruby -I#{direc}/lib/ #{direc}/examples/example3.rb "
+end
+
+desc "Run example4"
+task :example4 do
+  sh "ruby -I#{direc}/lib/ #{direc}/examples/example4.rb "
+end
+
 desc  "Generate gemspec file"
 task :gemspec => "ruby:gemspec"
 
