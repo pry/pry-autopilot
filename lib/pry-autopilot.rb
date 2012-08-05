@@ -5,19 +5,26 @@ require "pry-autopilot/frame"
 require "pry-autopilot/input"
 
 class PryAutopilot
-  attr_accessor :input
   attr_reader :predicates
+  attr_accessor :input
   attr_accessor :_pry_
 
   def initialize(fallback_input=Readline, &block)
     @input = Input.new(self)
     @fallback_input = fallback_input
+    @blocks = []
     instance_exec(&block) if block
   end
 
   def readline(prompt)
-    process_predicates if input.empty?
-    input.shift || fallback_readline(prompt)
+    process_predicates
+
+    if @blocks.any?
+      @blocks.each { |b| instance_exec(&b) }
+      ""
+    else
+      fallback_readline(prompt)
+    end
   end
 
   def on(predicate, &block)
@@ -27,7 +34,11 @@ class PryAutopilot
 
   private
   def frame
-    Frame.new(@_pry_.current_context)
+    Frame.new(_pry_.current_context)
+  end
+
+  def run(command_string)
+    _pry_.run_command command_string
   end
 
   def fallback_readline(prompt)
@@ -40,9 +51,11 @@ class PryAutopilot
 
   def process_predicates
     return if !predicates
+    @blocks.clear
+
     predicates.each do |predicate, block|
       if predicate.call(frame)
-        block.call(input)
+        @blocks << block
       end
     end
   end

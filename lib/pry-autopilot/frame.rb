@@ -19,7 +19,10 @@ class PryAutopilot
     def eval(*args)
       @binding.eval(*args)
     end
-    alias var eval
 
+    def var(string)
+      self.eval(string)
+    rescue Pry::RescuableException
+    end
   end
 end
